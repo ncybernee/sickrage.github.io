@@ -22,7 +22,7 @@ def main():
         networks = BeautifulSoup(data, 'html.parser').select('select[name="changenetwork"] > option')
     except Exception as error:
         print('Exception while loading network list from TheTVDB.com: {}'.format(error))
-        networks = []
+        sys.exit(1)
 
     for current in networks[1:]:  # skip first empty option
         new_list[current['value']] = current.text
@@ -63,7 +63,7 @@ def main():
 
     if not QUIET:
         print(u'\x1b[1m--- Listing valid old networks + time zones ---\x1b[0m'.center(89))
-        print(u'\x1b[1m\x1b[4;30;47m' + u'Action'.center(16) + u'Network Name'.center(35) +
+        print(u'\x1b[1m\x1b[0;30;47m' + u'Action'.center(16) + u'Network Name'.center(35) +
               u' - ' + u'Time Zone'.center(35) + u'\x1b[0m')
 
     while old_list:
@@ -85,7 +85,7 @@ def main():
             invalid_data.append(line_format)
             if not QUIET:
                 print(u'\x1b[1m{color}{action: ^16}\x1b[0m{name: ^35} - {time_zone: ^35}'.format(
-                    color=(u'\x1b[5;30;43m', u'\x1b[5;30;41m')[PURGE], action='Invalid:',
+                    color=(u'\x1b[0;30;43m', u'\x1b[5;30;41m')[PURGE], action='Invalid:',
                     name=current['name'], time_zone=current['time_zone']))
             continue
 
@@ -104,7 +104,7 @@ def main():
         print('')
 
         print(u'\x1b[1m--- Listing networks missing time zones ---\x1b[0m'.center(89))
-        print(u'\x1b[1m\x1b[4;30;47m' + u'Action'.center(16) + u'Network Name'.center(35) +
+        print(u'\x1b[1m\x1b[0;30;47m' + u'Action'.center(16) + u'Network Name'.center(35) +
               u' - ' + u'Time Zone'.center(35) + u'\x1b[0m')
 
     data_to_append = []
@@ -127,7 +127,7 @@ def main():
             invalid_data.append(line_format)
             if not QUIET:
                 print(u'\x1b[1m{color}{action: ^16}\x1b[0m{name: ^35} - {time_zone: ^35}'.format(
-                    color=(u'\x1b[5;30;43m', u'\x1b[5;30;41m')[PURGE], action='Invalid:',
+                    color=(u'\x1b[0;30;43m', u'\x1b[5;30;41m')[PURGE], action='Invalid:',
                     name=current['name'], time_zone=current['time_zone']))
             continue
 
@@ -151,7 +151,7 @@ def main():
     match_country = re.compile(r'\(([a-z\s]+)\)$', re.I)
     if not QUIET:
         print(u'\x1b[1m--- Adding new networks ---\x1b[0m'.center(127))
-        print(u'\x1b[1m\x1b[4;30;47m' + u'Action'.center(17) + u'Network Name'.center(35) +
+        print(u'\x1b[1m\x1b[0;30;47m' + u'Action'.center(17) + u'Network Name'.center(35) +
               u' - ' + u'Country'.center(35) + u' - ' + u'Guessed Time Zone'.center(35) + u'\x1b[0m')
     for key, value in new_list.items():
         # try to determine time zone by country name in display name
@@ -231,7 +231,7 @@ def main():
     print('--- Done ---\n')
     print('New file created [{0}]\n'.format(os.path.basename(file_path)))
     
-    print('  \033[4m{0: <28}: {1}\033[0m\n'.format('Total processed', len(new_data) + len(invalid_data) + duplicate_count))
+    print('  \033[4m{0: <28}: {1}\033[0m\n'.format('Total processed', len(new_data) + len(invalid_data) + len(data_to_append) + duplicate_count))
     print('    {0: <26}: {1}'.format('Valid networks added', len(new_data)))
     print('    {0: <26}: {1}'.format('Missing time zone', missing_count))
     print('    {0: <26}: {1}'.format('New with time zone', auto_new_count))
