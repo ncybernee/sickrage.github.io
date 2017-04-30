@@ -150,10 +150,10 @@ def main():
     for key, value in new_list.items():
         # try to determine time zone by country name in display name
         tz_guess = ''
-        country = re.findall(match_country, value)
+        country = re.findall(match_country, value) or country_code.search_str(key)
         if country:
             code = country_code[country[0]]
-            if len(code) <= 2:
+            if len(code) == 2:
                 tz_guess = country_timezones(code)[0]
 
         if tz_guess:
@@ -172,10 +172,10 @@ def main():
     for key, value_ in dump_list.items():
         # try to determine time zone by country name in display name
         tz_guess = ''
-        country = re.findall(match_country, key)
+        country = re.findall(match_country, key) or country_code.search_str(key)
         if country:
             code = country_code[country[0]]
-            if len(code) <= 2:
+            if len(code) == 2:
                 tz_guess = country_timezones(code)[0]
 
         if tz_guess:
@@ -245,13 +245,22 @@ class CountryCode:
         with codecs.open(os.path.join(SCRIPT_PATH, 'json_data', 'countries.json'), 'r', 'utf-8') as countries_file:
             self.countries = json.load(countries_file)
 
+        self.countries = {key.lower(): value for key, value in self.countries.items()}  # keys to lowercase
+        self.match_regex = re.compile(r'(' + r'|'.join(self.countries.keys()) + r')$', re.I)
+
         self.exceptions = {
             u'UK': u'GB'
         }
 
     def __getitem__(self, country):
         """ Get country two-letter code from name """
-        return self.countries.get(country, self.exceptions.get(country, country))
+        return self.countries.get(country.lower(), self.exceptions.get(country.upper(), country))
+
+    def search_str(self, raw):
+        result = re.search(self.match_regex, raw)
+        if result:
+            return [result.group(0)]
+        return None
 
 
 def fix_utf8_output():
