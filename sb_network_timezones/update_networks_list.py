@@ -17,8 +17,13 @@ def main():
     # Load data from TVDB network select box
     new_list = {}
     url = 'http://thetvdb.com/?tab=series&id=80379&lid=7'  # the big bang theory
-    data = requests.get(url).content
-    networks = BeautifulSoup(data, 'html.parser').select('select[name="changenetwork"] > option')
+    try:
+        data = requests.get(url).content
+        networks = BeautifulSoup(data, 'html.parser').select('select[name="changenetwork"] > option')
+    except Exception as error:
+        print('Exception while loading network list from TheTVDB.com: {}'.format(error))
+        networks = []
+
     for current in networks[1:]:  # skip first empty option
         new_list[current['value']] = current.text
 
