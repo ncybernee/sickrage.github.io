@@ -213,15 +213,15 @@ def main():
     with codecs.open(file_path, 'w', 'utf-8') as tz_file:
         if PURGE:
             if new_data:
-                new_data.sort()
+                new_data.sort(key=lambda x: x.lower())
                 tz_file.writelines(new_data)
         else:
             if new_data or invalid_data:
                 joined_data = new_data + invalid_data
-                joined_data.sort()
+                joined_data.sort(key=lambda x: x.lower())
                 tz_file.writelines(joined_data)
         if data_to_append:
-            data_to_append.sort()
+            data_to_append.sort(key=lambda x: x.lower())
             tz_file.writelines(data_to_append)
 
     if PURGE and invalid_data:
