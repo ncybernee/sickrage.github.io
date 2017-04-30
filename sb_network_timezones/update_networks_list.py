@@ -147,6 +147,7 @@ def main():
         print('')
 
     country_code = CountryCode()
+    timezones = TimeZones()
     match_country = re.compile(r'\(([a-z\s]+)\)$', re.I)
     if not QUIET:
         print(u'\x1b[1m--- Adding new networks ---\x1b[0m'.center(127))
@@ -159,7 +160,7 @@ def main():
         if country:
             code = country_code[country[0]]
             if len(code) == 2:
-                tz_guess = country_timezones(code)[0]
+                tz_guess = timezones[code]
 
         if tz_guess:
             auto_new_count += 1
@@ -181,7 +182,7 @@ def main():
         if country:
             code = country_code[country[0]]
             if len(code) == 2:
-                tz_guess = country_timezones(code)[0]
+                tz_guess = timezones[code]
 
         if tz_guess:
             auto_new_count += 1
@@ -266,6 +267,17 @@ class CountryCode:
         if result:
             return [result.group(0)]
         return None
+
+
+class TimeZones:
+    def __init__(self):
+        self.exceptions = {
+            'US': 'US/Eastern',
+            'CA': 'Canada/Eastern',
+        }
+    def __getitem__(self, code):
+        code = code.upper()
+        return self.exceptions.get(code, country_timezones.get(code, [None])[0])
 
 
 def fix_utf8_output():
