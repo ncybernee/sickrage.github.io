@@ -3,7 +3,7 @@ module.exports = function(grunt) {
   grunt.initConfig({
     pkg: grunt.file.readJSON('package.json'),
     jsonlint: {
-        files: ['scene_exceptions/scene_exceptions.json']
+      files: ['scene_exceptions/scene_exceptions.json']
     },
     jshint: {
       files: ['Gruntfile.js']
