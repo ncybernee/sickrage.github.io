@@ -36,20 +36,21 @@ def main():
     # Load data from current list
     file_path = os.path.join(SCRIPT_PATH, 'network_timezones.txt')
     old_list = []
+    missing_list = []
     if os.path.isfile(file_path):
         with codecs.open(file_path, 'r', 'utf-8') as tz_file:
             for current in tz_file.readlines():
                 name, time_zone = current.strip('\n').rsplit(':', 1)
-                old_list.append({
+                (old_list, missing_list)[not time_zone].append({
                     'name': name,
                     'time_zone': time_zone
                 })
 
-    new_count = auto_new_count = duplicate_count = 0
+    missing_count = new_count = auto_new_count = duplicate_count = 0
     new_data = []
     invalid_data = []
 
-    def is_name_in_list(name, lst):
+    def is_network_in_list(name, lst):
         for item in lst:
             if item.startswith(name + ':'):
                 return True
@@ -65,7 +66,7 @@ def main():
 
         line_format = u'{name}:{time_zone}\n'.format(name=current['name'], time_zone=current['time_zone'])
 
-        is_duplicate = is_name_in_list(current['name'], new_data + invalid_data)
+        is_duplicate = is_network_in_list(current['name'], new_data + invalid_data)
         if is_duplicate:
             duplicate_count += 1
             if not QUIET:
@@ -83,7 +84,46 @@ def main():
                     name=current['name'], time_zone=current['time_zone']))
             continue
 
-        if not current['time_zone']:  # treat as new network
+        # ensure that no duplicates are added
+        if found_in_new:
+            del new_list[current['name']]
+        if found_in_dump:
+            del dump_list[current['name']]
+
+        if not QUIET:
+            print(u'\x1b[1m\x1b[0;30;42m{action: ^16}\x1b[0m{name: ^35} - {time_zone: ^35}'.format(
+                action='Re-adding:', name=current['name'], time_zone=current['time_zone']))
+        new_data.append(line_format)
+
+    if not QUIET:
+        print('')
+
+        print(u'\x1b[1m--- Listing networks missing time zones ---\x1b[0m'.center(89))
+        print(u'\x1b[1m\x1b[4;30;47m' + u'Action'.center(16) + u'Network Name'.center(35) +
+              u' - ' + u'Time Zone'.center(35) + u'\x1b[0m')
+
+    data_to_append = []
+    while missing_list:
+        current = missing_list.pop(0)
+
+        line_format = u'{name}:{time_zone}\n'.format(name=current['name'], time_zone=current['time_zone'])
+
+        is_duplicate = is_network_in_list(current['name'], new_data + invalid_data)
+        if is_duplicate:
+            duplicate_count += 1
+            if not QUIET:
+                print(u'\x1b[1m\x1b[5;30;41m{action: ^16}\x1b[0m{name: ^35} - {time_zone: ^35}'.format(
+                    action='Duplicate:', name=current['name'], time_zone=current['time_zone']))
+            continue
+
+        found_in_new = current['name'] in new_list
+        found_in_dump = current['name'] in dump_list
+        if not (found_in_new or found_in_dump):
+            invalid_data.append(line_format)
+            if not QUIET:
+                print(u'\x1b[1m{color}{action: ^16}\x1b[0m{name: ^35} - {time_zone: ^35}'.format(
+                    color=(u'\x1b[5;30;43m', u'\x1b[5;30;41m')[PURGE], action='Invalid:',
+                    name=current['name'], time_zone=current['time_zone']))
             continue
 
         # ensure that no duplicates are added
@@ -92,16 +132,17 @@ def main():
         if found_in_dump:
             del dump_list[current['name']]
 
-        new_data.append(line_format)
+        missing_count += 1
         if not QUIET:
-            print(u'\x1b[1m\x1b[0;30;42m{action: ^16}\x1b[0m{name: ^35} - {time_zone: ^35}'.format(
-                action='Re-adding:', name=current['name'], time_zone=current['time_zone']))
+            print(u'\x1b[1m\x1b[0;30;45m{action: ^16}\x1b[0m{name: ^35} - {time_zone: ^35}'.format(
+                action='Missing TZ:', name=current['name'], time_zone=current['time_zone']))
+        data_to_append.append(line_format)
+
     if not QUIET:
         print('')
 
     country_code = CountryCode()
     match_country = re.compile(r'\(([a-z\s]+)\)$', re.I)
-    data_to_append = []
     if not QUIET:
         print(u'\x1b[1m--- Adding new networks ---\x1b[0m'.center(127))
         print(u'\x1b[1m\x1b[4;30;47m' + u'Action'.center(17) + u'Network Name'.center(35) +
@@ -141,19 +182,19 @@ def main():
             auto_new_count += 1
             if not QUIET:
                 print(u'\x1b[1m\x1b[0;30;46m{0: ^16}\x1b[0m {1: ^35} - {2: ^35} - {3: ^35}'.format(
-                    'New network:', key, country[0], tz_guess))
+                    'New from dump:', key, country[0], tz_guess))
             new_data.append(u'{name}:{time_zone}\n'.format(name=key, time_zone=tz_guess))
         elif country:
             new_count += 1
             if not QUIET:
                 print(u'\x1b[1m\x1b[0;30;43m{0: ^16} {1: ^35} - {2: ^35} - {3: ^35}\x1b[0m'.format(
-                    'New network:', key, country[0], 'Unknown'))
+                    'New from dump:', key, country[0], 'Unknown'))
             data_to_append.append(u'{name}:{time_zone}\n'.format(name=key, time_zone=tz_guess))
         else:
             new_count += 1
             if not QUIET:
                 print(u'\x1b[1m\x1b[0;30;43m{0: ^16} {1: ^35} - {2: ^35} - {3: ^35}\x1b[0m'.format(
-                    'New network:', key, 'Unknown', 'Unknown'))
+                    'New from dump:', key, 'Unknown', 'Unknown'))
             data_to_append.append(u'{name}:{time_zone}\n'.format(name=key, time_zone=tz_guess))
 
     if not QUIET:
@@ -184,6 +225,7 @@ def main():
     print('--- Done ---\n')
     print('New file created [{0}]'.format(os.path.basename(file_path)))
     print('\t{0: <28}: {1}'.format('Total', len(new_data)))
+    print('\t{0: <28}: {1}'.format('Missing time zone', missing_count))
     print('\t{0: <28}: {1}'.format('New with time zone', auto_new_count))
     print('\t{0: <28}: {1}'.format('New without time zone', new_count))
     print('\t{0: <28}: {1}'.format('Duplicates:', duplicate_count))
