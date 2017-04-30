@@ -229,19 +229,21 @@ def main():
             tz_file.writelines(invalid_data)
 
     print('--- Done ---\n')
-    print('New file created [{0}]'.format(os.path.basename(file_path)))
-    print('\t{0: <28}: {1}'.format('Total', len(new_data)))
-    print('\t{0: <28}: {1}'.format('Missing time zone', missing_count))
-    print('\t{0: <28}: {1}'.format('New with time zone', auto_new_count))
-    print('\t{0: <28}: {1}'.format('New without time zone', new_count))
-    print('\t{0: <28}: {1}'.format('Duplicates:', duplicate_count))
+    print('New file created [{0}]\n'.format(os.path.basename(file_path)))
+    
+    print('  \033[4m{0: <28}: {1}\033[0m\n'.format('Total processed', len(new_data) + len(invalid_data) + duplicate_count))
+    print('    {0: <26}: {1}'.format('Valid networks added', len(new_data)))
+    print('    {0: <26}: {1}'.format('Missing time zone', missing_count))
+    print('    {0: <26}: {1}'.format('New with time zone', auto_new_count))
+    print('    {0: <26}: {1}'.format('New without time zone', new_count))
+    print('    {0: <26}: {1}'.format('Duplicates:', duplicate_count))
     if invalid_data:
         if not PURGE:
-            print('\t{0: <28}: {1}'.format('Invalid networks added', len(invalid_data)))
+            print('    {0: <26}: {1}'.format('Invalid networks re-added', len(invalid_data)))
         else:
             print('')
-            print('New file created [{0}]'.format(os.path.basename(discarded_file_path)))
-            print('\t{0: <28}: {1}'.format('Total discarded', len(invalid_data)))
+            print('New file created [{0}]\n'.format(os.path.basename(discarded_file_path)))
+            print('  \033[4m{0: <28}: {1}\033[0m'.format('Total discarded', len(invalid_data)))
 
 
 class CountryCode:
