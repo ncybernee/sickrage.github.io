@@ -1,3 +1,34 @@
+### v2018.07.21-1
+
+[full changelog](https://github.com/SickRage/SickRage/compare/v2018.07.18-2...v2018.07.21-1)
+
+* change yggtorrent url
+* Update translations (build 9513) [skip ci]
+
+### v2018.07.18-2
+
+[full changelog](https://github.com/SickRage/SickRage/compare/v2018.07.18-1...v2018.07.18-2)
+
+* Fix red text warnings on provider settings
+* Add helper functions to make sure enable_daily, enable_backlog, and search_fallback are integers Fixes [#4721](https://github.com/SickRage/SickRage/issues/4721) Closes [#4829](https://github.com/SickRage/SickRage/issues/4829)
+* Add new provider: BJ-Share (Brazillian) ([#4727](https://github.com/SickRage/SickRage/issues/4727))
+* Update translations (build 9506) [skip ci]
+
+### v2018.07.18-1
+
+[full changelog](https://github.com/SickRage/SickRage/compare/v2018.06.15-1...v2018.07.18-1)
+
+* run isort to fix import order
+* fix import order
+* fix order \_\_init\_\_.py
+* add gimmepeers icon + \_\_init\_\_ + gimmepeers.py
+* Move inside ss
+* Fix [#4771](https://github.com/SickRage/SickRage/issues/4771)
+* change yggtorrent url
+* Fixed manual post processing not honouring settings when moving files
+* Do not assume that torrenttable div will be present and well formed.
+* Update translations (build 9487) [skip ci]
+
 ### v2018.06.15-1
 
 [full changelog](https://github.com/SickRage/SickRage/compare/v2018.06.10-1...v2018.06.15-1)
